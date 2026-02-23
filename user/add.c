@@ -86,6 +86,7 @@ int main(int argc, char *argv[])
     printf("ERROR IN LINE READING: %d\n", read_ln_res);
     return read_ln_res;
   }
+  printf("|%s|\n", buffer);
   char* ptr = buffer;
   
   int fst;
