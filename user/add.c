@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
   int read_ln_res = read_ln(buffer);
   if(read_ln_res < 0){
     printf("ERROR IN LINE READING: %d\n", read_ln_res);
-    return read_ln_res;
+    exit(read_ln_res);
   }
   printf("|%s|\n", buffer);
   char* ptr = buffer;
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
   int parse_res = parse_int(&ptr, &fst);
   if(parse_res < 0){
     printf("ERROR IN PARSING INTEGER: %d\n", parse_res);
-    return parse_res;
+    exit(parse_res);
   }
 
 
@@ -101,7 +101,7 @@ int main(int argc, char *argv[])
   parse_res = parse_int(&ptr, &snd);
   if(parse_res < 0){
     printf("ERROR IN PARSING INTEGER: %d\n", parse_res);
-    return parse_res;
+    exit(parse_res);
   }
 
   while(*ptr == ' '){
@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
   }
   if(*ptr != '\0'){
     printf("ERROR: EXTRA CHARACTERS IN INPUT\n");
-    return -1;
+    exit(-1);
   }
 
   printf("%d + %d = %d\n", fst, snd, add(fst, snd));
