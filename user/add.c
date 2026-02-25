@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
   }
 
   printf("%d + %d = %d\n", fst, snd, add(fst, snd));
-  return 0;
+  exit(0);
 }
   
   
