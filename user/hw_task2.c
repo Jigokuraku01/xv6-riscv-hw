@@ -53,10 +53,16 @@ int main(int argc, char *argv[])
       arg += write_res;
       len -= write_res;
     }
-    int write_res = write(pipeid[1], " ", 1);
-    if(write_res < 0){
-      fprintf(2, "ERROR IN WRITE: %d\n", pipeid[1]);
-      exit(1);
+    len = 1;
+    arg = " ";
+    while(*arg){
+      int write_res = write(pipeid[1], arg, len);
+      if(write_res < 0){
+        fprintf(2, "ERROR IN WRITE: %d\n", pipeid[1]);
+        exit(1);
+      }
+      arg += write_res;
+      len -= write_res;
     }
   }
 
