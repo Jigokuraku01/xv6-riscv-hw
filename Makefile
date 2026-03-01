@@ -146,7 +146,8 @@ UPROGS=\
 	$U/_forphan\
 	$U/_dorphan\
 	$U/_hw_task1a\
-	$U/_hw_task1b
+	$U/_hw_task1b\
+	$U/_hw_task2\
 
 fs.img: mkfs/mkfs README $(UPROGS)
 	mkfs/mkfs fs.img README $(UPROGS)
