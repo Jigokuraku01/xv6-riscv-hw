@@ -11,6 +11,9 @@ int read_ln(char* buffer){
     if(read_res < 0){
       return read_res;
     }
+    if(read_res == 0){
+      break;
+    }
     if(c == '\n'){
       break;
     }
@@ -79,12 +82,12 @@ int parse_int(char **ptr, int* num){
 
 int main(int argc, char *argv[])
 {
-  char buffer[BUFFERSIZE];
+  char buffer[BUFFERSIZE] = {0};
 
   int read_ln_res = read_ln(buffer);
   if(read_ln_res < 0){
-    printf("ERROR IN LINE READING: %d\n", read_ln_res);
-    exit(read_ln_res);
+    fprintf(2, "ERROR IN LINE READING: %d\n", read_ln_res);
+    exit(1);
   }
   printf("|%s|\n", buffer);
   char* ptr = buffer;
@@ -92,24 +95,24 @@ int main(int argc, char *argv[])
   int fst;
   int parse_res = parse_int(&ptr, &fst);
   if(parse_res < 0){
-    printf("ERROR IN PARSING INTEGER: %d\n", parse_res);
-    exit(parse_res);
+    fprintf(2, "ERROR IN PARSING INTEGER: %d\n", parse_res);
+    exit(1);
   }
 
 
   int snd;
   parse_res = parse_int(&ptr, &snd);
   if(parse_res < 0){
-    printf("ERROR IN PARSING INTEGER: %d\n", parse_res);
-    exit(parse_res);
+    fprintf(2, "ERROR IN PARSING INTEGER: %d\n", parse_res);
+    exit(1);
   }
 
   while(*ptr == ' '){
     ptr++;
   }
   if(*ptr != '\0'){
-    printf("ERROR: EXTRA CHARACTERS IN INPUT\n");
-    exit(-1);
+    fprintf(2, "ERROR: EXTRA CHARACTERS IN INPUT\n");
+    exit(1);
   }
 
   printf("%d + %d = %d\n", fst, snd, add(fst, snd));

@@ -1,5 +1,6 @@
 .globl main
 .globl printf
+.globl fprintf
 .globl gets
 
 .section .rodata
@@ -206,10 +207,11 @@ print_buffer:
 
     bgez s3, parse_second
 
-    la a0, msg_parse_error
-    mv a1, s3
-    call printf
-    mv a0, s3
+    li a0, 2
+    la a1, msg_parse_error
+    mv a2, s3
+    call fprintf
+    li a0, 1
     j main_exit
 
 parse_second:
@@ -225,10 +227,11 @@ parse_second:
 
     bgez s3, check_extra
 
-    la a0, msg_parse_error
-    mv a1, s3
-    call printf
-    mv a0, s3
+    li a0, 2
+    la a1, msg_parse_error
+    mv a2, s3
+    call fprintf
+    li a0, 1
     j main_exit
 
 check_extra:
@@ -246,9 +249,10 @@ check_end_of_string:
     lb t0, 0(s2)
     beqz t0, print_result
 
-    la a0, msg_extra_chars
-    call printf
-    li a0, -1
+    li a0, 2
+    la a1, msg_extra_chars
+    call fprintf
+    li a0, 1
     j main_exit
 
 print_result:
