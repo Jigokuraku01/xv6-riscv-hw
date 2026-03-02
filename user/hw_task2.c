@@ -62,38 +62,34 @@ int main(int argc, char *argv[]) {
         len -= write_res;
       }
       cur_buffer_size = 0;
-      memmove(buffer + cur_buffer_size, arg, len);
-      cur_buffer_size += len;
-      buffer[cur_buffer_size++] = '\n';
+      memset(buffer, 0, BUFFERSIZE);
     }
-    memset(buffer, 0, BUFFERSIZE);
+    arg = argv[i];
+    len = tmp_len;
+    memmove(buffer + cur_buffer_size, arg, len);
+    cur_buffer_size += len;
+    buffer[cur_buffer_size++] = '\n';
   }
-  arg = argv[i];
-  len = tmp_len;
-  memmove(buffer + cur_buffer_size, arg, len);
-  cur_buffer_size += len;
-  buffer[cur_buffer_size++] = '\n';
-}
 
-char *arg = buffer;
-int len = cur_buffer_size;
-while (*arg) {
-  int write_res = write(pipeid[1], arg, len);
-  if (write_res <= 0) {
-    fprintf(2, "ERROR IN WRITE: %d\n", pipeid[1]);
+  char *arg = buffer;
+  int len = cur_buffer_size;
+  while (*arg) {
+    int write_res = write(pipeid[1], arg, len);
+    if (write_res <= 0) {
+      fprintf(2, "ERROR IN WRITE: %d\n", pipeid[1]);
+      exit(1);
+    }
+    arg += write_res;
+    len -= write_res;
+  }
+  cur_buffer_size = 0;
+  memset(buffer, 0, BUFFERSIZE);
+
+  if (close(pipeid[1]) < 0) {
+    fprintf(2, "ERROR IN CLOSE: %d\n", pipeid[1]);
     exit(1);
   }
-  arg += write_res;
-  len -= write_res;
-}
-cur_buffer_size = 0;
-memset(buffer, 0, BUFFERSIZE);
-
-if (close(pipeid[1]) < 0) {
-  fprintf(2, "ERROR IN CLOSE: %d\n", pipeid[1]);
-  exit(1);
-}
-int status;
-wait(&status);
-exit(0);
+  int status;
+  wait(&status);
+  exit(0);
 }
