@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
       len -= write_res;
     }
     len = 1;
-    arg = " ";
+    arg = "\n";
     while(*arg){
       int write_res = write(pipeid[1], arg, len);
       if(write_res < 0){
