@@ -3,6 +3,18 @@
 
 #define BUFFERSIZE 256
 
+static void my_flush(int fd, char *buf, int len) {
+  while (len > 0) {
+    int write_res = write(fd, buf, len);
+    if (write_res <= 0) {
+      fprintf(2, "ERROR IN WRITE: %d\n", fd);
+      exit(1);
+    }
+    buf += write_res;
+    len -= write_res;
+  }
+}
+
 int main(int argc, char *argv[]) {
   int pid, pipeid[2];
   if (pipe(pipeid) < 0) {
@@ -40,7 +52,10 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  close(pipeid[0]);
+  if (close(pipeid[0]) < 0) {
+    fprintf(2, "ERROR IN CLOSE: %d\n", pipeid[0]);
+    exit(1);
+  }
 
   char buffer[BUFFERSIZE] = {0};
   int cur_buffer_size = 0;
@@ -50,46 +65,28 @@ int main(int argc, char *argv[]) {
     int tmp_len = len;
 
     if (cur_buffer_size + len + 1 >= BUFFERSIZE) {
-      arg = buffer;
-      len = cur_buffer_size;
-      while (*arg) {
-        int write_res = write(pipeid[1], arg, len);
-        if (write_res <= 0) {
-          fprintf(2, "ERROR IN WRITE: %d\n", pipeid[1]);
-          exit(1);
-        }
-        arg += write_res;
-        len -= write_res;
-      }
+      my_flush(pipeid[1], buffer, cur_buffer_size);
       cur_buffer_size = 0;
-      memset(buffer, 0, BUFFERSIZE);
     }
     arg = argv[i];
     len = tmp_len;
-    memmove(buffer + cur_buffer_size, arg, len);
+    memcpy(buffer + cur_buffer_size, arg, len);
     cur_buffer_size += len;
     buffer[cur_buffer_size++] = '\n';
   }
 
-  char *arg = buffer;
-  int len = cur_buffer_size;
-  while (*arg) {
-    int write_res = write(pipeid[1], arg, len);
-    if (write_res <= 0) {
-      fprintf(2, "ERROR IN WRITE: %d\n", pipeid[1]);
-      exit(1);
-    }
-    arg += write_res;
-    len -= write_res;
+  if (cur_buffer_size > 0) {
+    my_flush(pipeid[1], buffer, cur_buffer_size);
   }
-  cur_buffer_size = 0;
-  memset(buffer, 0, BUFFERSIZE);
 
   if (close(pipeid[1]) < 0) {
     fprintf(2, "ERROR IN CLOSE: %d\n", pipeid[1]);
     exit(1);
   }
   int status;
-  wait(&status);
+  if (wait(&status) < 0) {
+    fprintf(2, "ERROR IN WAIT\n");
+    exit(1);
+  }
   exit(0);
 }
