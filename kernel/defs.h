@@ -75,6 +75,7 @@ int             pipewrite(struct pipe*, uint64, int);
 // mutex.c
 struct file*    mutexalloc(void);
 void            mutexclose(struct sleeplock*);
+int             mutexsetdebug(int);
 
 // printf.c
 int             printf(char*, ...) __attribute__ ((format (printf, 1, 2)));

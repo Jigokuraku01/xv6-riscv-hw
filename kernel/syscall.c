@@ -104,6 +104,7 @@ extern uint64 sys_close(void);
 extern uint64 sys_mutex(void);
 extern uint64 sys_mutex_lock(void);
 extern uint64 sys_mutex_unlock(void);
+extern uint64 sys_mutex_debug(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -132,6 +133,7 @@ static uint64 (*syscalls[])(void) = {
 [SYS_mutex]   sys_mutex,
 [SYS_mutex_lock] sys_mutex_lock,
 [SYS_mutex_unlock] sys_mutex_unlock,
+[SYS_mutex_debug] sys_mutex_debug,
 };
 
 void

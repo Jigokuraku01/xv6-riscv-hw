@@ -545,3 +545,13 @@ sys_mutex_unlock(void)
   releasesleep(f->mutex);
   return 0;
 }
+
+uint64
+sys_mutex_debug(void)
+{
+  int on;
+
+  argint(0, &on);
+  mutexsetdebug(on);
+  return 0;
+}
