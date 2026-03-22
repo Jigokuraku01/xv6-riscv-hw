@@ -53,7 +53,6 @@ test_fork_filedup_semantics(void)
   }
 
   if(pid == 0){
-    // If fd was duplicated via filedup in fork, child can lock/unlock same mutex.
     int ok = (mutex_lock(fd) == 0) && (mutex_unlock(fd) == 0) && (close(fd) == 0);
     exit(ok ? 0 : 1);
   }
@@ -199,7 +198,6 @@ main(void)
 {
   printf("mutex_cases: start\n");
 
-  // Keep debug logging off by default.
   mutex_debug(0);
 
   test_rw_fstat_errors();
