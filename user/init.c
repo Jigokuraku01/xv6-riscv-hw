@@ -14,7 +14,7 @@ char *argv[] = { "sh", 0 };
 int
 main(void)
 {
-  int pid, wpid;
+  int pid, wpid, fd;
 
   if(open("console", O_RDWR) < 0){
     mknod("console", CONSOLE, 0);
@@ -22,6 +22,38 @@ main(void)
   }
   dup(0);  // stdout
   dup(0);  // stderr
+
+  fd = open("null", O_RDWR);
+  if(fd < 0){
+    mknod("null", PSEUDODEV, PSEUDO_NULL);
+    fd = open("null", O_RDWR);
+  }
+  if(fd >= 0)
+    close(fd);
+
+  fd = open("zero", O_RDONLY);
+  if(fd < 0){
+    mknod("zero", PSEUDODEV, PSEUDO_ZERO);
+    fd = open("zero", O_RDONLY);
+  }
+  if(fd >= 0)
+    close(fd);
+
+  fd = open("urandom", O_RDWR);
+  if(fd < 0){
+    mknod("urandom", PSEUDODEV, PSEUDO_URANDOM);
+    fd = open("urandom", O_RDWR);
+  }
+  if(fd >= 0)
+    close(fd);
+
+  fd = open("nullstat", O_RDWR);
+  if(fd < 0){
+    mknod("nullstat", PSEUDODEV, PSEUDO_NULLSTAT);
+    fd = open("nullstat", O_RDWR);
+  }
+  if(fd >= 0)
+    close(fd);
 
   for(;;){
     printf("init: starting sh\n");
