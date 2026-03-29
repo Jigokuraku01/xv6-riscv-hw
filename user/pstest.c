@@ -71,6 +71,8 @@ test_normal_fill(void)
     check(list[i].pid > 0, "encountered non-positive pid");
     check(list[i].state >= PINFO_UNUSED && list[i].state <= PINFO_ZOMBIE,
           "encountered invalid process state");
+    if(list[i].ppid != 0)
+      check(list[i].pname[0] != '\0', "non-root process has empty parent name");
   }
 
   free(list);

@@ -698,6 +698,9 @@ ps_listinfo(uint64 uaddr, int lim)
   struct procinfo info;
   int count = 0;
 
+  if(lim < 0)
+    return -1;
+
   if (uaddr == 0) {
     for (p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
@@ -718,12 +721,19 @@ ps_listinfo(uint64 uaddr, int lim)
     count++;
     if (count > lim) {
       release(&p->lock);
-      continue;
+      release(&wait_lock);
+      return count;
     }
     info.pid   = p->pid;
     info.state = (int)p->state;
     memmove(info.name, p->name, PROC_NAME_LEN);
-    info.ppid  = p->parent ? p->parent->pid : 0;
+    if(p->parent){
+      info.ppid = p->parent->pid;
+      memmove(info.pname, p->parent->name, PROC_NAME_LEN);
+    } else {
+      info.ppid = 0;
+      info.pname[0] = '\0';
+    }
     release(&p->lock);
   
     if (copyout(cur->pagetable,

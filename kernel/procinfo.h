@@ -17,6 +17,7 @@ struct procinfo {
   char name[PROC_NAME_LEN];
   int state;
   int ppid;
+  char pname[PROC_NAME_LEN];
 };
 
 #endif
