@@ -107,3 +107,38 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_pagetableprint(void)
+{
+  vmprintproc(myproc()->pagetable);
+  return 0;
+}
+
+uint64
+sys_pageflagsclear(void)
+{
+  uint64 buf;
+  uint64 len;
+  uint64 mask;
+
+  argaddr(0, &buf);
+  argaddr(1, &len);
+  argaddr(2, &mask);
+
+  return vmclearad(myproc()->pagetable, buf, len, mask);
+}
+
+uint64
+sys_pageflagscheck(void)
+{
+  uint64 buf;
+  uint64 len;
+  uint64 mask;
+
+  argaddr(0, &buf);
+  argaddr(1, &len);
+  argaddr(2, &mask);
+
+  return vmcheckad(myproc()->pagetable, buf, len, mask);
+}
