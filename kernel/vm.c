@@ -484,3 +484,110 @@ ismapped(pagetable_t pagetable, uint64 va)
   }
   return 0;
 }
+
+static void
+vmprintf(char *dst, pte_t pte)
+{
+  dst[0] = (pte & PTE_R) ? 'R' : '_';
+  dst[1] = (pte & PTE_W) ? 'W' : '_';
+  dst[2] = (pte & PTE_X) ? 'X' : '_';
+  dst[3] = (pte & PTE_U) ? 'U' : '_';
+  dst[4] = (pte & PTE_G) ? 'G' : '_';
+  dst[5] = (pte & PTE_A) ? 'A' : '_';
+  dst[6] = (pte & PTE_D) ? 'D' : '_';
+  dst[7] = '\0';
+}
+
+static void
+vmprintwalk(pagetable_t pagetable, int level)
+{
+  for(int i = 0; i < 512; i++){
+    pte_t pte = pagetable[i];
+    if((pte & PTE_V) == 0)
+      continue;
+
+    for(int d = 0; d < level; d++)
+      printf(".........");
+    if(level > 0)
+      printf(" ");
+
+    char flags[8];
+    vmprintf(flags, pte);
+    printf("0x%x -> %p %s\n", i, (void *)PTE2PA(pte), flags);
+
+    if((pte & (PTE_R | PTE_W | PTE_X)) == 0)
+      vmprintwalk((pagetable_t)PTE2PA(pte), level + 1);
+  }
+}
+
+void
+vmprintproc(pagetable_t pagetable)
+{
+  printf("PAGETABLE %p\n", (void *)pagetable);
+  vmprintwalk(pagetable, 0);
+}
+
+static int
+vmvalidate_range(uint64 va, uint64 len, uint64 *start, uint64 *end)
+{
+  struct proc *p = myproc();
+
+  if(len == 0)
+    return -1;
+  if(va >= MAXVA)
+    return -1;
+  if(va + len < va)
+    return -1;
+  if(va + len > p->sz)
+    return -1;
+
+  *start = PGROUNDDOWN(va);
+  *end = PGROUNDDOWN(va + len - 1);
+  return 0;
+}
+
+int
+vmclearad(pagetable_t pagetable, uint64 va, uint64 len, uint64 mask)
+{
+  uint64 start, end;
+
+  if((mask & ~(PTE_A | PTE_D)) != 0 || mask == 0)
+    return -1;
+  if(vmvalidate_range(va, len, &start, &end) < 0)
+    return -1;
+
+  for(uint64 a = start; a <= end; a += PGSIZE){
+    pte_t *pte = walk(pagetable, a, 0);
+    if(pte == 0)
+      continue;
+    if((*pte & PTE_V) == 0)
+      continue;
+    *pte &= ~mask;
+  }
+
+  sfence_vma();
+  return 0;
+}
+
+int
+vmcheckad(pagetable_t pagetable, uint64 va, uint64 len, uint64 mask)
+{
+  uint64 start, end;
+
+  if((mask & ~(PTE_A | PTE_D)) != 0 || mask == 0)
+    return -1;
+  if(vmvalidate_range(va, len, &start, &end) < 0)
+    return -1;
+
+  for(uint64 a = start; a <= end; a += PGSIZE){
+    pte_t *pte = walk(pagetable, a, 0);
+    if(pte == 0)
+      continue;
+    if((*pte & PTE_V) == 0)
+      continue;
+    if((*pte & mask) != 0)
+      return 1;
+  }
+
+  return 0;
+}
