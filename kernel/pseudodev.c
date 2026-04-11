@@ -9,7 +9,9 @@
 
 static uint64 pseudo_seed = 88172645463393265ULL;
 static uint64 nullstat_total = 0;
-static struct spinlock pseudo_lock;
+static struct spinlock seed_lock;
+static struct spinlock stat_lock;
+static char zero_buf[32] = {0};
 
 static uint64
 pseudo_next(void)
@@ -33,12 +35,11 @@ pseudoread(int minor, int user_dst, uint64 dst, int n)
     return 0;
 
   case PSEUDO_ZERO:
-    for(i = 0; i < n; i += sizeof(buf)){
+    for(i = 0; i < n; i += sizeof(zero_buf)){
       int m = n - i;
-      if(m > sizeof(buf))
-        m = sizeof(buf);
-      memset(buf, 0, m);
-      if(either_copyout(user_dst, dst + i, buf, m) < 0)
+      if(m > sizeof(zero_buf))
+        m = sizeof(zero_buf);
+      if(either_copyout(user_dst, dst + i, zero_buf, m) < 0)
         return -1;
     }
     return n;
@@ -50,12 +51,12 @@ pseudoread(int minor, int user_dst, uint64 dst, int n)
       if(m > sizeof(buf))
         m = sizeof(buf);
 
-      acquire(&pseudo_lock);
+      acquire(&seed_lock);
       for(j = 0; j < m; j++){
         value = pseudo_next();
         buf[j] = (char)(value >> 56);
       }
-      release(&pseudo_lock);
+      release(&seed_lock);
 
       if(either_copyout(user_dst, dst + i, buf, m) < 0)
         return -1;
@@ -66,9 +67,9 @@ pseudoread(int minor, int user_dst, uint64 dst, int n)
     if(n != sizeof(uint64))
       return -1;
 
-    acquire(&pseudo_lock);
+    acquire(&stat_lock);
     value = nullstat_total;
-    release(&pseudo_lock);
+    release(&stat_lock);
 
     if(either_copyout(user_dst, dst, (char *)&value, sizeof(value)) < 0)
       return -1;
@@ -100,15 +101,15 @@ pseudowrite(int minor, int user_src, uint64 src, int n)
     if(either_copyin((char *)&value, user_src, src, sizeof(value)) < 0)
       return -1;
 
-    acquire(&pseudo_lock);
+    acquire(&seed_lock);
     pseudo_seed = value;
-    release(&pseudo_lock);
+    release(&seed_lock);
     return sizeof(uint64);
 
   case PSEUDO_NULLSTAT:
-    acquire(&pseudo_lock);
+    acquire(&stat_lock);
     nullstat_total += (uint64)n;
-    release(&pseudo_lock);
+    release(&stat_lock);
     return n;
 
   default:
@@ -119,7 +120,8 @@ pseudowrite(int minor, int user_src, uint64 src, int n)
 void
 pseudodevinit(void)
 {
-  initlock(&pseudo_lock, "pseudodev");
+  initlock(&seed_lock, "pseudodev-seed");
+  initlock(&stat_lock, "pseudodev-stat");
   devsw[PSEUDODEV].read = pseudoread;
   devsw[PSEUDODEV].write = pseudowrite;
 }
