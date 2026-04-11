@@ -15,6 +15,7 @@ int
 main(void)
 {
   int pid, wpid;
+  struct stat st;
 
   if(open("console", O_RDWR) < 0){
     mknod("console", CONSOLE, 0);
@@ -22,6 +23,22 @@ main(void)
   }
   dup(0);  // stdout
   dup(0);  // stderr
+
+  if(stat("null", &st) < 0){
+    mknod("null", PSEUDODEV, PSEUDO_NULL);
+  }
+
+  if(stat("zero", &st) < 0){
+    mknod("zero", PSEUDODEV, PSEUDO_ZERO);
+  }
+
+  if(stat("urandom", &st) < 0){
+    mknod("urandom", PSEUDODEV, PSEUDO_URANDOM);
+  }
+
+  if(stat("nullstat", &st) < 0){
+    mknod("nullstat", PSEUDODEV, PSEUDO_NULLSTAT);
+  }
 
   for(;;){
     printf("init: starting sh\n");

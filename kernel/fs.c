@@ -497,6 +497,12 @@ readi(struct inode *ip, int user_dst, uint64 dst, uint off, uint n)
   uint tot, m;
   struct buf *bp;
 
+  if(ip->type == T_DEVICE){
+    if(ip->major < 0 || ip->major >= NDEV || !devsw[ip->major].read)
+      return -1;
+    return devsw[ip->major].read(ip->minor, user_dst, dst, n);
+  }
+
   if(off > ip->size || off + n < off)
     return 0;
   if(off + n > ip->size)
@@ -530,6 +536,12 @@ writei(struct inode *ip, int user_src, uint64 src, uint off, uint n)
 {
   uint tot, m;
   struct buf *bp;
+
+  if(ip->type == T_DEVICE){
+    if(ip->major < 0 || ip->major >= NDEV || !devsw[ip->major].write)
+      return -1;
+    return devsw[ip->major].write(ip->minor, user_src, src, n);
+  }
 
   if(off > ip->size || off + n < off)
     return -1;
