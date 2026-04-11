@@ -170,6 +170,10 @@ int             copyinstr(pagetable_t, char *, uint64, uint64);
 int             ismapped(pagetable_t, uint64);
 uint64          vmfault(pagetable_t, uint64, int);
 
+// rtc.c
+void            rtcinit(void);
+uint64          rtctime(void);
+
 // plic.c
 void            plicinit(void);
 void            plicinithart(void);
