@@ -107,3 +107,16 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_rtctime(void)
+{
+  uint64 addr;
+  uint64 t;
+
+  argaddr(0, &addr);
+  t = rtctime();
+  if(copyout(myproc()->pagetable, addr, (char*)&t, sizeof(t)) < 0)
+    return -1;
+  return 0;
+}
