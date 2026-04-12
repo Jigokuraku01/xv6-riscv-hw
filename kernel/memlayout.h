@@ -21,7 +21,6 @@
 #define UART0 0x10000000L
 #define UART0_IRQ 10
 
-// qemu goldfish RTC registers.
 #define RTC0 0x101000L
 #define RTC_LOW RTC0
 #define RTC_HIGH (RTC0 + 0x4)
