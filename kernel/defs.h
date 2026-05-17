@@ -77,6 +77,15 @@ int             printf(char*, ...) __attribute__ ((format (printf, 1, 2)));
 void            panic(char*) __attribute__((noreturn));
 void            printfinit(void);
 
+// dmesg.c
+void            dmesg_init(void);
+void            dmesg_putc(int);
+void            pr_msg(const char*, ...) __attribute__ ((format (printf, 1, 2)));
+int             dmesg_read(uint64, int);
+void            dmesg_set_log(uint, int);
+int             dmesg_log_on(uint);
+void            dmesg_tick(void);
+
 // proc.c
 int             cpuid(void);
 void            kexit(int);

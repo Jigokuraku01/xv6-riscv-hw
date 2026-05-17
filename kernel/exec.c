@@ -6,6 +6,7 @@
 #include "proc.h"
 #include "defs.h"
 #include "elf.h"
+#include "dmesg.h"
 
 static int loadseg(pde_t *, uint64, struct inode *, uint, uint);
 
@@ -126,7 +127,7 @@ kexec(char *path, char **argv)
     if(*s == '/')
       last = s+1;
   safestrcpy(p->name, last, sizeof(p->name));
-    
+
   // Commit to the user image.
   oldpagetable = p->pagetable;
   p->pagetable = pagetable;
@@ -134,6 +135,9 @@ kexec(char *path, char **argv)
   p->trapframe->epc = elf.entry;  // initial program counter = ulib.c:start()
   p->trapframe->sp = sp; // initial stack pointer
   proc_freepagetable(oldpagetable, oldsz);
+
+  if(dmesg_log_on(LOG_EXEC))
+    pr_msg("exec: pid=%d path=%s name=%s", p->pid, path, p->name);
 
   return argc; // this ends up in a0, the first argument to main(argc, argv)
 
@@ -168,6 +172,6 @@ loadseg(pagetable_t pagetable, uint64 va, struct inode *ip, uint offset, uint sz
     if(readi(ip, 0, (uint64)pa, offset+i, n) != n)
       return -1;
   }
-  
+
   return 0;
 }

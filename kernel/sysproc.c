@@ -6,6 +6,7 @@
 #include "spinlock.h"
 #include "proc.h"
 #include "vm.h"
+#include "dmesg.h"
 
 uint64
 sys_exit(void)
@@ -106,4 +107,24 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+uint64
+sys_dmesg(void)
+{
+  uint64 uva;
+  int n;
+  argaddr(0, &uva);
+  argint(1, &n);
+  return dmesg_read(uva, n);
+}
+
+uint64
+sys_setlog(void)
+{
+  int mask, duration;
+  argint(0, &mask);
+  argint(1, &duration);
+  dmesg_set_log((uint)mask, duration);
+  return 0;
 }
