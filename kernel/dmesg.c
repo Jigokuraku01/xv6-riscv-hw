@@ -215,8 +215,10 @@ dmesg_read(uint64 uva, int n)
       pos = (pos + 1) % DMESGSIZE;
       avail--;
       if(skipping){
-        if(c == '\n')
+        if(c == '\n'){
           skipping = 0;
+          tmp[chunk++] = c;
+        }
         continue;
       }
       tmp[chunk++] = c;
