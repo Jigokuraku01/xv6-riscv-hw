@@ -65,7 +65,6 @@ static int read_all_stdin(unsigned char **out, size_t *out_len) {
 }
 
 int main(int argc, char **argv) {
-  signal(SIGPIPE, SIG_IGN);
   size_t block_size = 0;
   int with_type = 1;
 
