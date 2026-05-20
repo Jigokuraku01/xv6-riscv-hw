@@ -1,3 +1,4 @@
+#include <signal.h>
 #define _FILE_OFFSET_BITS 64
 #include "ext2.h"
 
@@ -122,6 +123,7 @@ static int print_indirect(ext2_ctx *c, uint32_t bnum, int level, int *count) {
 }
 
 int main(int argc, char **argv) {
+  signal(SIGPIPE, SIG_IGN);
   if (argc != 3) {
     fprintf(stderr, "usage: %s <image> <inode>\n", argv[0]);
     return 1;
